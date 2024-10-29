@@ -6,6 +6,7 @@ from django.views.decorators.csrf import requires_csrf_token
 
 from .forms import RegistrationForm
 
+
 @requires_csrf_token
 def index(request):
     reg_form = RegistrationForm()
@@ -36,6 +37,7 @@ def index(request):
                 messages.error(request, "Login failed. Please check your credentials.")
     context = {'reg_form': reg_form, 'login_form': login_form, 'title': 'Home'}
     return render(request, 'users/index.html', context)
+
 
 def logout_user(request):
     logout(request)
