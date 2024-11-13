@@ -1,0 +1,63 @@
+:root {
+    --federal-blue: #03045eff;
+    --honolulu-blue: #0077b6ff;
+    --pacific-cyan: #00b4d8ff;
+    --non-photo-blue: #90e0efff;
+    --light-cyan: #caf0f8ff;
+}
+
+body {
+    background-color: var(--pacific-cyan);
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    background-color: var(--non-photo-blue);
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 600px;
+    margin: 2rem auto;
+}
+
+h1, h2 {
+    color: var(--federal-blue);
+}
+
+.card {
+    background-color: var(--light-cyan);
+    border: 1px solid var(--federal-blue);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: var(--federal-blue);
+    color: var(--pacific-cyan);
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--honolulu-blue);
+    border-radius: 8px 8px 0 0;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+.alert-info {
+    background-color: var(--honolulu-blue);
+    color: var(--federal-blue);
+    border: 1px solid var(--non-photo-blue);
+    padding: 0.75rem;
+    border-radius: 4px;
+}
+
+.btn-primary, .btn-secondary {
+    background-color: var(--federal-blue);
+    color: var(--pacific-cyan);
+    border: none;
+    width: 100%;
+}
+
+.btn-primary:hover, .btn-secondary:hover {
+    background-color: var(--honolulu-blue);
+    color: var(--federal-blue);
+}

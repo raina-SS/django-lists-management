@@ -1,138 +1,33 @@
-<!-- dashboard.html -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Dashboard</title>
-    <style>
-        /* Basic styling for layout */
-        .container {
-            display: flex;
-        }
-
-        .sidebar {
-            width: 25%;
-            padding: 1em;
-            border-right: 1px solid #aab5f3;
-        }
-
-        .list-nav {
-            padding: 1em;
-            list-style: none;
-        }
-
-        .list-nav-item {
-            background-color: aliceblue;
-            border: 1px solid darkslategrey;
-            margin: 1em;
-            padding: 1em;
-        }
-
-        .content {
-            width: 75%;
-            padding: 1em;
-        }
-
-        .list-item {
-            display: flex;
-            justify-content: space-between;
-            background-color: aliceblue;
-            border: 1px solid darkslategrey;
-            margin: 1em;
-            padding: 1em;
-        }
-
-        .list-item .item-name {
-            cursor: pointer;
-        }
-
-        .list-item .item-name:hover {
-            opacity: 65%;
-        }
-
-        button {
-            background-color: bisque;
-            padding: 0.5em;
-        }
-
-        .delete-icon {
-            cursor: pointer;
-            color: red;
-        }
-
-        .checkbox-icon {
-            cursor: pointer;
-            color: gray;
-        }
-
-        .checked-icon {
-            color: green;
-        }
-
-        /* Modal styling */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            width: 500px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            align-items: flex-start;
-        }
-
-        .modal-header {
-            font-weight: bold;
-        }
-
-        .close-btn {
-            float: right;
-            cursor: pointer;
-            color: red;
-            font-size: 20px;
-        }
-
-        /* Form Styling */
-        form {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            justify-content: space-around;
-        }
-
-        form button {
-            margin: 0.5em;
-        }
-
-        form div, input, textarea {
-            margin: 0.5em;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'styles/lists.css' %}">
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+            integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
 </head>
 <body>
-<div class="container">
+<div class="container-fluid d-flex p-0">
     <!-- Sidebar -->
-    <div class="sidebar">
-        <button onclick="showModal('addListModal')">Add List</button>
-        <a href="{% url 'logout' %}">Log out</a>
-        <h2>Your Lists</h2>
+    <div class="sidebar bg-dark text-light p-3 d-flex flex-column" style="width: 25%;">
+        <button class="btn btn-warning mb-2" onclick="showModal('addListModal')">Add List</button>
+        <button class="btn btn-warning mb-2" onclick="showModal('importListModal')">Import</button>
+        <a class="btn btn-danger mb-3" href="{% url 'logout' %}">Log out</a>
+
+        <h2 class="fs-5 border-bottom pb-2 mb-3">Your Lists</h2>
+
         {% if user_lists %}
-            <ul class="list-nav">
+            <ul class="nav flex-column">
                 {% for list in user_lists %}
-                    <li class="list-nav-item">
-                        <a href="?list_id={{ list.id }}">{{ list.name }}</a>
+                    <li class="nav-item {% if selected_list.id == list.id %}bg-secondary text-light{% endif %}">
+                        <a class="nav-link text-light p-2" href="?list_id={{ list.id }}">{{ list.name }}</a>
                     </li>
                 {% endfor %}
             </ul>
@@ -142,57 +37,56 @@
     </div>
 
     <!-- Main Content -->
-    <div class="content">
+    <div class="content flex-grow-1 p-4 bg-light">
         <div>
             {% if messages %}
-                <ul>
+                <ul class="list-unstyled">
                     {% for message in messages %}
-                        <li>{{ message }}</li>
+                        <li class="alert alert-info">{{ message }}</li>
                     {% endfor %}
                 </ul>
             {% endif %}
         </div>
 
         {% if selected_list %}
-            <h2>{{ selected_list.name }} Items</h2>
-            <div>
-                <span class="delete-icon" onclick="deleteList('{% url 'lists:delete_list' selected_list.id %}')">Delete List ✖</span>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="fs-4">{{ selected_list.name }} Items</h2>
+                <span class="text-danger" role="button"
+                      onclick="deleteList('{% url 'lists:delete_list' selected_list.id %}')">Delete List ✖</span>
             </div>
 
             <!-- Sorting Dropdown -->
-            {% if selected_list %}
-                <div>
-                    <label for="sort-items">Sort items by:</label>
-                    <select id="sort-items" onchange="location = this.value;">
-                        {% for field, field_label in sort_fields.items %}
-                            {% for direction, direction_label in sort_directions.items %}
-                                <option value="?list_id={{ selected_list.id }}&sort_by={{ field }}&order={{ direction }}"
-                                        {% if request.GET.sort_by == field and request.GET.order == direction %}
-                                        selected {% endif %}>
-                                    {{ field_label }} ({{ direction_label }})
-                                </option>
-                            {% endfor %}
+            <div class="mb-3">
+                <label for="sort-items" class="form-label">Sort items by:</label>
+                <select id="sort-items" class="form-select" onchange="location = this.value;">
+                    {% for field, field_label in sort_fields.items %}
+                        {% for direction, direction_label in sort_directions.items %}
+                            <option value="?list_id={{ selected_list.id }}&sort_by={{ field }}&order={{ direction }}"
+                                    {% if request.GET.sort_by == field and request.GET.order == direction %}
+                                    selected {% endif %}>
+                                {{ field_label }} ({{ direction_label }})
+                            </option>
                         {% endfor %}
-                    </select>
-                </div>
-            {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
 
             <!-- Items List -->
             {% if list_items %}
-                <ul>
+                <ul class="list-group mb-3">
                     {% for item in list_items %}
-                        <li class="list-item">
-                            <div>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
                                 {% if item.is_completed %}
-                                    <span class="checked-icon">✔</span>
+                                    <span class="text-success me-2">✔</span>
                                 {% else %}
-                                    <span class="checkbox-icon"
+                                    <span class="text-secondary me-2" role="button"
                                           onclick="markItem('{% url 'lists:complete_item' item.id %}')">☐</span>
                                 {% endif %}
-                                <span class="item-name" style="color: {{ item.color }}"
+                                <span class="fw-bold item-name" style="color: {{ item.color }}"
                                       onclick="showEditModal({{ item.id }})">{{ item.name }}</span>
                             </div>
-                            <span class="delete-icon"
+                            <span class="text-danger" role="button"
                                   onclick="deleteItem('{% url 'lists:delete_item' item.id %}')">✖</span>
                         </li>
                     {% endfor %}
@@ -202,7 +96,7 @@
             {% endif %}
 
             <!-- Add Item Button -->
-            <button onclick="showModal('addItemModal')">Add Item</button>
+            <button class="btn btn-primary" onclick="showModal('addItemModal')">Add Item</button>
         {% else %}
             <p>Select a list to view items.</p>
         {% endif %}
@@ -210,56 +104,105 @@
 </div>
 
 <!-- Add List Modal -->
-<div id="addListModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="hideModal('addListModal')">&times;</span>
-        <div class="modal-header">Add New List</div>
-        <form method="post" action="{% url 'lists:add_list' %}">
-            {% csrf_token %}
-            <label for="list_name">Name:</label>
-            <input type="text" id="list_name" name="list_name">
-            <button type="submit">Add List</button>
-        </form>
+<div id="addListModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New List</h5>
+                <button type="button" class="btn-close" onclick="hideModal('addListModal')"></button>
+            </div>
+            <form method="post" action="{% url 'lists:add_list' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <label for="list_name" class="form-label">Name:</label>
+                    <input type="text" id="list_name" name="list_name" class="form-control">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('addListModal')">Close</button>
+                    <button type="submit" class="btn btn-primary">Add List</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<!-- Add Item Modal -->
 {% if selected_list %}
-    <div id="addItemModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="hideModal('addItemModal')">&times;</span>
-            <div class="modal-header">Add New Item</div>
-            <form method="post" action="{% url 'lists:add_item' selected_list.id %}">
-                {% csrf_token %}
-                {{ add_item_form }}
-                <button type="submit">Add Item</button>
-            </form>
+    <!-- Add Item Modal -->
+    <div id="addItemModal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Item</h5>
+                    <button type="button" class="btn-close" onclick="hideModal('addItemModal')"></button>
+                </div>
+                <form method="post" action="{% url 'lists:add_item' selected_list.id %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        {{ add_item_form }}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="hideModal('addItemModal')">Close
+                        </button>
+                        <button type="submit" class="btn btn-primary">Add Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Item Modal -->
+    <div id="editItemModal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Item</h5>
+                    <button type="button" class="btn-close" onclick="hideModal('editItemModal')"></button>
+                </div>
+                <form method="post" action="{% url 'lists:edit_item' 0 %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        {{ edit_item_form }}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="hideModal('editItemModal')">Close
+                        </button>
+                        <button type="submit" class="btn btn-primary">Save Item</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 {% endif %}
 
-<!-- Edit Item Modal -->
-{% if selected_list %}
-    <div id="editItemModal" class="modal">
+<!-- Import List Modal -->
+<div id="importListModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
         <div class="modal-content">
-            <span class="close-btn" onclick="hideModal('editItemModal')">&times;</span>
-            <div class="modal-header">Edit Item</div>
-            <form method="post" action="{% url 'lists:edit_item' 0 %}">
+            <div class="modal-header">
+                <h5 class="modal-title">Import Lists</h5>
+                <button type="button" class="btn-close" onclick="hideModal('importListModal')"></button>
+            </div>
+            <form method="post" action="{% url 'lists:import' %}" enctype="multipart/form-data">
                 {% csrf_token %}
-                {{ edit_item_form }}
-                <button type="submit">Save Item</button>
+                <div class="modal-body">
+                    {{ import_form }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('importListModal')">Close
+                    </button>
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </div>
             </form>
         </div>
     </div>
-{% endif %}
-
+</div>
 <script>
     function showModal(modalId) {
-        document.getElementById(modalId).style.display = 'flex';
+        $(`#${modalId}`).modal('show');
     }
 
     function hideModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
+        $(`#${modalId}`).modal('hide');
     }
 
     function deleteItem(deleteItemUrl) {
@@ -279,16 +222,15 @@
     }
 
     function showEditModal(item_id) {
-        const form = document.querySelector('#editItemModal form');
-        form.action = '{% url 'lists:edit_item' 0 %}'.replace('0', item_id);
+        const form = $('#editItemModal form');
+        form.attr('action', '{% url "lists:edit_item" 0 %}'.replace('0', item_id));
         fetch('{% url 'lists:get_item' 0 %}'.replace('0', item_id))
             .then(res => res.json())
             .then(data => {
-                console.log(form.querySelector('input[name="name"]'))
-                form.querySelector('textarea[name="name"]').value = data.name;
-                form.querySelector('input[name="color"]').value = data.color;
-            })
-        document.getElementById('editItemModal').style.display = 'flex';
+                form.find('textarea[name="name"]').val(data.name);
+                form.find('input[name="color"]').val(data.color);
+            });
+        $('#editItemModal').modal('show');
     }
 </script>
 </body>

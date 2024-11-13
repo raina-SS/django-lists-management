@@ -29,13 +29,18 @@ their own lists with complete privacy.
     source {env_name}/bin/activate
     ```
 
-3. Install dependencies:
+3. Create `.env` file in root directly and add values for keys from `.env.sample` 
+
+4. Install dependencies:
    `pip install -r requirements.txt`
-    
-4. Run migrations and start the server:
+
+5. Run migrations and start the server:
     ```
     python manage.py migrate
     python manage.py runserver
     ```
    Access the app at http://127.0.0.1:8000/.
 
+### Import Data format
+
+Refer to import format provided in CSV file `import-format.csv`

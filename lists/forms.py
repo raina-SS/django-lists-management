@@ -1,4 +1,5 @@
-from django.forms import ModelForm, Textarea, TextInput
+from django import forms
+from django.forms import ModelForm, TextInput
 
 from lists.models import Item
 
@@ -20,3 +21,7 @@ class EditItemForm(ModelForm):
         widgets = {
             'color': TextInput(attrs={'type': 'color'})
         }
+
+
+class ImportForm(forms.Form):
+    file = forms.FileField(required=False)

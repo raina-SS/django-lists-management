@@ -12,4 +12,5 @@ urlpatterns = [
     path('items/<int:item_id>/delete', views.delete_item, name='delete_item'),
     path('items/<int:item_id>/complete', views.mark_item_complete, name='complete_item'),
     path('items/<int:item_id>', views.get_item_data, name='get_item'),
+    path('import/', views.import_list, name='import'),
 ]

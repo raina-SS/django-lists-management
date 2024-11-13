@@ -1,0 +1,142 @@
+:root {
+    --federal-blue: #03045eff;
+    --honolulu-blue: #0077b6ff;
+    --pacific-cyan: #00b4d8ff;
+    --non-photo-blue: #90e0efff;
+    --light-cyan: #caf0f8ff;
+}
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+    background-color: var(--federal-blue);
+    color: var(--pacific-cyan);
+    width: 25%;
+    min-height: 100vh;
+}
+
+.sidebar h2 {
+    color: var(--pacific-cyan);
+    border-bottom: 2px solid var(--non-photo-blue);
+}
+
+.sidebar .nav-link {
+    color: var(--pacific-cyan);
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-item.bg-secondary {
+    background-color: var(--light-cyan);
+    color: var(--federal-blue);
+}
+
+/* Buttons */
+.btn-warning {
+    background-color: var(--non-photo-blue);
+    border: none;
+    color: var(--federal-blue);
+}
+
+.btn-warning:hover {
+    background-color: var(--honolulu-blue);
+    color: var(--federal-blue);
+}
+
+.btn-danger {
+    background-color: var(--federal-blue);
+    color: var(--pacific-cyan);
+}
+
+.btn-danger:hover {
+    background-color: var(--honolulu-blue);
+    color: var(--federal-blue);
+}
+
+/* Main Content */
+.content {
+    background-color: var(--pacific-cyan);
+    color: var(--federal-blue);
+    padding: 2rem;
+}
+
+.content h2 {
+    color: var(--federal-blue);
+}
+
+.list-group-item {
+    border: 1px solid var(--honolulu-blue);
+    color: var(--federal-blue);
+}
+
+.list-group-item:hover {
+    background-color: var(--light-cyan);
+}
+
+.list-group-item .item-name:hover {
+    cursor: pointer;
+}
+
+/* Modals */
+.modal-content {
+    background-color: var(--light-cyan);
+    color: var(--federal-blue);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--non-photo-blue);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--non-photo-blue);
+}
+
+.btn-close {
+    color: var(--federal-blue);
+}
+
+.modal-footer .btn-primary,
+.modal-footer .btn-secondary {
+    background-color: var(--federal-blue);
+    border: none;
+    color: var(--pacific-cyan);
+}
+
+.modal-footer .btn-primary:hover,
+.modal-footer .btn-secondary:hover {
+    background-color: var(--honolulu-blue);
+    color: var(--federal-blue);
+}
+
+/* Sorting Dropdown */
+.form-select {
+    background-color: var(--non-photo-blue);
+    border: 1px solid var(--honolulu-blue);
+    color: var(--federal-blue);
+}
+
+.form-select:focus {
+    border-color: var(--light-cyan);
+    box-shadow: 0 0 0 0.2rem rgba(76, 115, 102, 0.25);
+}
+
+/* Alerts */
+.alert-info {
+    background-color: var(--light-cyan);
+    border: 1px solid var(--non-photo-blue);
+    color: var(--federal-blue);
+}
+
+/* Input Fields */
+.form-control {
+    background-color: var(--pacific-cyan);
+    border: 1px solid var(--non-photo-blue);
+    color: var(--federal-blue);
+}
+
+.form-control:focus {
+    border-color: var(--light-cyan);
+    box-shadow: 0 0 0 0.2rem rgba(76, 115, 102, 0.25);
+}

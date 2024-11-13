@@ -1,11 +1,15 @@
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+import csv
+import re
+from io import TextIOWrapper
+
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import DatabaseError
 from django.views.decorators.csrf import requires_csrf_token
 
-from lists.forms import ItemForm, EditItemForm
+from lists.forms import ItemForm, EditItemForm, ImportForm
 from lists.models import List, Item
 import logging
 
@@ -26,7 +30,6 @@ def index(request):
         #  Get selected list and items with applied sorting
         selected_list = get_object_or_404(List, id=selected_list_id, user=request.user)
         selected_list_items = Item.objects.filter(list__id=selected_list_id).order_by(sort_order + sort_by)
-        print(selected_list_items)
 
         # TODO: Improve sorting for template
         # Sorting options for the template
@@ -40,6 +43,7 @@ def index(request):
             'edit_item_form': EditItemForm(),
             'sort_fields': sort_fields,
             'sort_directions': sort_directions,
+            'import_form': ImportForm(),
         })
 
     return render(request, 'lists/index.html', context)
@@ -54,13 +58,12 @@ def add_list(request):
         return HttpResponseBadRequest("Name required")
     try:
         new_list = List.objects.create(name=list_name, user=request.user)
+        messages.success(request, 'List "%s" has been created' % list_name)
+        return redirect('/lists/?list_id=%s' % new_list.id)
     except DatabaseError as e:
         logger.warning(f"Failed to create list '{list_name}': {e}")
         messages.error(request, 'An error occurred while adding the list.')
         return redirect('/lists')
-    else:
-        messages.success(request, 'List "%s" has been created' % list_name)
-        return redirect('/lists/?list_id=%s' % new_list.id)
 
 
 @login_required(login_url='/')
@@ -68,11 +71,10 @@ def delete_list(request, list_id):
     list_to_delete = get_object_or_404(List, id=list_id, user=request.user)
     try:
         list_to_delete.delete()
+        messages.success(request, 'List "%s" has been deleted' % list_id)
     except DatabaseError as e:
         logger.warning(f"Failed to delete list '{list_id}': {e}")
         messages.error(request, 'An error occurred while deleting the list.')
-    else:
-        messages.success(request, 'List "%s" has been deleted' % list_id)
     return redirect('/lists/')
 
 
@@ -85,12 +87,10 @@ def add_item(request, list_id):
         if add_item_form.is_valid():
             try:
                 new_item = add_item_form.save()
+                messages.success(request, 'Item "%s" has been added to list "%s"' % (new_item, selected_list.name))
             except DatabaseError as e:
                 logger.warning(f"Failed to add item for list '{list_id}': {e}")
                 messages.error(request, 'An error occurred while adding item to the list.')
-            else:
-                messages.success(request,
-                                 'Item "%s" has been added to list "%s"' % (new_item, selected_list.name))
     return redirect('/lists/?list_id=%s' % list_id)
 
 
@@ -99,11 +99,10 @@ def delete_item(request, item_id):
     item_to_delete = get_object_or_404(Item, id=item_id)
     try:
         item_to_delete.delete()
+        messages.success(request, 'Item "%s" has been deleted' % item_to_delete.name)
     except DatabaseError as e:
         logger.warning(f"Failed to delete item {item_id}: {e}")
         messages.error(request, 'An error occurred while deleting the item.')
-    else:
-        messages.success(request, 'Item "%s" has been deleted' % item_to_delete.name)
     return redirect('/lists/?list_id=%s' % item_to_delete.list.id)
 
 
@@ -117,11 +116,10 @@ def edit_item(request, item_id):
             edit_item_form = EditItemForm(request.POST, instance=item_to_edit)
             if edit_item_form.is_valid():
                 edit_item_form.save()
+        messages.success(request, 'Item "%s" has been edited' % item_to_edit.name)
     except DatabaseError as e:
         logger.warning(f"Failed to edit item {item_id}: {e}")
         messages.error(request, 'An error occurred while editing the item.')
-    else:
-        messages.success(request, 'Item "%s" has been edited' % item_to_edit.name)
     return redirect('/lists/?list_id=%s' % item_to_edit.list.id)
 
 
@@ -131,11 +129,10 @@ def mark_item_complete(request, item_id):
     marked_item.is_completed = True
     try:
         marked_item.save()
+        messages.success(request, 'Item "%s" has been marked as complete' % marked_item.name)
     except DatabaseError as e:
         logger.warning(f"Failed to mark item complete {item_id}: {e}")
         messages.error(request, 'An error occurred while marking the item complete.')
-    else:
-        messages.success(request, 'Item "%s" has been marked as complete' % marked_item.name)
     return redirect('/lists/?list_id=%s' % marked_item.list.id)
 
 
@@ -143,3 +140,52 @@ def mark_item_complete(request, item_id):
 def get_item_data(request, item_id):
     item = get_object_or_404(Item, id=item_id)
     return JsonResponse({'name': item.name, 'color': item.color})
+
+
+@login_required(login_url='/')
+@requires_csrf_token
+def import_list(request):
+    if request.method == 'POST':
+        form = ImportForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                with TextIOWrapper(request.FILES['file'], encoding=request.encoding) as import_file:
+                    csv_reader = csv.DictReader(import_file, delimiter=',')
+                    created_lists_mapping = {}
+                    for row in csv_reader:
+                        # validate row data
+                        error_messages = []
+                        if not row['ListName']:
+                            error_messages.append('List name is empty!')
+                        if not row['ListId']:
+                            error_messages.append('List ID is empty!')
+                        if not row['ItemName']:
+                            error_messages.append('Item name is empty!')
+                        if row['Color'] and not re.fullmatch(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$', row['Color']):
+                            error_messages.append('Color code is invalid!')
+                        if row['IsCompleted'] not in ['True', 'False', '']:
+                            error_messages.append('Is Completed value is invalid!')
+
+                        if len(error_messages) > 0:
+                            messages.error(request,
+                                           'Error in adding data for row "%s" ' % row + ' '.join(error_messages))
+                            continue
+
+                        # Check if the list is already created, else create list
+                        if not created_lists_mapping.get(row['ListId']):
+                            new_list = List(name=row['ListName'], user=request.user)
+                            new_list.save()
+                            created_lists_mapping[row['ListId']] = new_list.id
+
+                        # Create item
+                        new_item = Item(name=row['ItemName'],
+                                        is_completed=row['IsCompleted'] == 'True',
+                                        list_id=created_lists_mapping[row['ListId']])
+                        if row['Color']:
+                            new_item.color = row['Color']
+                        new_item.save()
+                messages.success(request, '%s imported.' % request.FILES['file'].name)
+            except Exception as e:
+                logger.error('Error in importing file %s\n%s', request.FILES['file'].name, e, exc_info=True)
+                messages.error(request, 'Import failed.')
+    return redirect('/lists/')

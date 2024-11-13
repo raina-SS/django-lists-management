@@ -5,3 +5,4 @@ lists/migrations/__pycache__/
 listsmanagement/__pycache__/
 users/__pycache__/
 users/migrations/__pycache__/
+/.env

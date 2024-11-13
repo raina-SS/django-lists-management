@@ -1,120 +1,54 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>{{ title }}</title>
-    <style>
-        /* General styling */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f7f7f7;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-
-        h1 {
-            text-align: center;
-            color: #4CAF50;
-            margin-top: 20px;
-        }
-
-        /* Container for forms */
-        .container {
-            max-width: 500px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 {
-            color: #333;
-            border-bottom: 2px solid #4CAF50;
-            padding-bottom: 5px;
-        }
-
-        /* Form styling */
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        button {
-            padding: 10px;
-            color: #fff;
-            background-color: #4CAF50;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        form .helptext {
-            display: inline-block;
-        }
-
-        form > p {
-            margin-bottom: 0.5em;
-            margin-top: 0.5em;
-        }
-
-        form ul {
-            margin: 0;
-        }
-
-        form input {
-            margin-bottom: 0.2em;
-        }
-
-        /* Message list */
-        ul.message-list {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        .message-list li {
-            background-color: #f0f0f0;
-            padding: 10px;
-            border-left: 5px solid #4CAF50;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            color: #555;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/users.css' %}">
 </head>
 <body>
-<h1>User Registration and Login</h1>
+<div class="container my-5">
+    <h1 class="text-center mb-4">User Registration and Login</h1>
 
-<div class="container">
     {% if messages %}
-        <ul class="message-list">
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
+        <div class="alert alert-info" role="alert">
+            <ul class="list-unstyled mb-0">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
     {% endif %}
 
-    <h2>User Registration</h2>
-    <form method="post" class="registration-form">
-        {% csrf_token %}
-        {{ reg_form.as_p }}
-        <button type="submit" name="register">Register</button>
-    </form>
+    <!-- User Registration Section -->
+    <div class="card mb-4">
+        <div class="bg-primary text-white card-header">
+            <h2 class="h4 mb-0">User Registration</h2>
+        </div>
+        <div class="card-body">
+            <form method="post" class="registration-form">
+                {% csrf_token %}
+                {{ reg_form.as_p }}
+                <button type="submit" name="register" class="btn btn-primary mt-3 w-100">Register</button>
+            </form>
+        </div>
+    </div>
 
-    <h2>User Login</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ login_form.as_p }}
-        <button type="submit" name="login">Login</button>
-    </form>
+    <!-- User Login Section -->
+    <div class="card">
+        <div class="card-header bg-secondary text-white">
+            <h2 class="h4 mb-0">User Login</h2>
+        </div>
+        <div class="card-body">
+            <form method="post" class="login-form">
+                {% csrf_token %}
+                {{ login_form.as_p }}
+                <button type="submit" name="login" class="btn btn-secondary mt-3 w-100">Login</button>
+            </form>
+        </div>
+    </div>
 </div>
+
 </body>
 </html>
