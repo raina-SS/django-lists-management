@@ -122,13 +122,6 @@ body {
     box-shadow: 0 0 0 0.2rem rgba(76, 115, 102, 0.25);
 }
 
-/* Alerts */
-.alert-info {
-    background-color: var(--light-cyan);
-    border: 1px solid var(--non-photo-blue);
-    color: var(--federal-blue);
-}
-
 /* Input Fields */
 .form-control {
     background-color: var(--pacific-cyan);

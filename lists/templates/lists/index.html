@@ -42,7 +42,7 @@
             {% if messages %}
                 <ul class="list-unstyled">
                     {% for message in messages %}
-                        <li class="alert alert-info">{{ message }}</li>
+                        <li class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}">{{ message }}</li>
                     {% endfor %}
                 </ul>
             {% endif %}

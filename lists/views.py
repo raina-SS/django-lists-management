@@ -152,7 +152,7 @@ def import_list(request):
                 with TextIOWrapper(request.FILES['file'], encoding=request.encoding) as import_file:
                     csv_reader = csv.DictReader(import_file, delimiter=',')
                     created_lists_mapping = {}
-                    for row in csv_reader:
+                    for row_number, row in enumerate(csv_reader, start=1):
                         # validate row data
                         error_messages = []
                         if not row['ListName']:
@@ -168,7 +168,7 @@ def import_list(request):
 
                         if len(error_messages) > 0:
                             messages.error(request,
-                                           'Error in adding data for row "%s" ' % row + ' '.join(error_messages))
+                                           f"Error in adding data for row {row_number}: {', '.join(error_messages)}")
                             continue
 
                         # Check if the list is already created, else create list

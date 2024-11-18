@@ -43,9 +43,6 @@ h1, h2 {
 }
 
 .alert-info {
-    background-color: var(--honolulu-blue);
-    color: var(--federal-blue);
-    border: 1px solid var(--non-photo-blue);
     padding: 0.75rem;
     border-radius: 4px;
 }
