@@ -25,3 +25,10 @@ class EditItemForm(ModelForm):
 
 class ImportForm(forms.Form):
     file = forms.FileField(required=False)
+    option = forms.ChoiceField(
+        choices=[
+            ('new-lists', 'Create all new Lists'),
+            ('existing-lists', 'Includes existing Lists'),
+            ('items-only', 'Import only Items'),
+        ]
+    )

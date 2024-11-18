@@ -148,17 +148,15 @@ def import_list(request):
     if request.method == 'POST':
         form = ImportForm(request.POST, request.FILES)
         if form.is_valid():
+            import_option = form.cleaned_data['option']
             try:
                 with TextIOWrapper(request.FILES['file'], encoding=request.encoding) as import_file:
                     csv_reader = csv.DictReader(import_file, delimiter=',')
-                    created_lists_mapping = {}
+                    lists_id_mapping = {}
+                    # TODO: Validate csv file headers
                     for row_number, row in enumerate(csv_reader, start=1):
-                        # validate row data
                         error_messages = []
-                        if not row['ListName']:
-                            error_messages.append('List name is empty!')
-                        if not row['ListId']:
-                            error_messages.append('List ID is empty!')
+                        # Validate item data
                         if not row['ItemName']:
                             error_messages.append('Item name is empty!')
                         if row['Color'] and not re.fullmatch(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$', row['Color']):
@@ -166,25 +164,57 @@ def import_list(request):
                         if row['IsCompleted'] not in ['True', 'False', '']:
                             error_messages.append('Is Completed value is invalid!')
 
+                        # Validate list data based on selected import option
+                        # If all are new lists & items
+                        if import_option == 'new-lists':
+                            if not row['ListName']:
+                                error_messages.append('List name is empty!')
+                            if not row['ListId']:
+                                error_messages.append('List ID is empty!')
+                        # If only items are to be imported, list ID should be provided
+                        elif import_option == 'items-only':
+                            if not row['ListId']:
+                                error_messages.append('List ID is empty!')
+                            elif not List.objects.filter(id=row['ListId']).exists():
+                                error_messages.append('List "%s" does not exist!' % row['ListId'])
+                        # If existing lists' IDs are provided along with new lists
+                        elif import_option == 'existing-lists':
+                            if not row['ListId'] and not row['ListName']:
+                                error_messages.append('List Name or ID is should be provided!')
+                            if row['ListId'] and not List.objects.filter(id=row['ListId']).exists():
+                                error_messages.append('List "%s" does not exist!' % row['ListId'])
+
                         if len(error_messages) > 0:
-                            messages.error(request,
-                                           f"Error in adding data for row {row_number}: {', '.join(error_messages)}")
+                            # TODO: If too many errors, show only row numbers
+                            messages.error(
+                                request,
+                                f"Error in adding data for row {row_number}: {', '.join(error_messages)}",
+                            )
                             continue
 
-                        # Check if the list is already created, else create list
-                        if not created_lists_mapping.get(row['ListId']):
-                            new_list = List(name=row['ListName'], user=request.user)
-                            new_list.save()
-                            created_lists_mapping[row['ListId']] = new_list.id
-
                         # Create item
-                        new_item = Item(name=row['ItemName'],
-                                        is_completed=row['IsCompleted'] == 'True',
-                                        list_id=created_lists_mapping[row['ListId']])
+                        new_item = Item(
+                            name=row['ItemName'],
+                            is_completed=row['IsCompleted'] == 'True',
+                        )
                         if row['Color']:
                             new_item.color = row['Color']
+
+                        if import_option == 'items-only':
+                            new_item.list_id = row['ListId']
+                        elif import_option == 'existing-lists' and row['ListId']:
+                            new_item.list_id = row['ListId']
+                        else:
+                            # Check if the list is already created, else create list
+                            if not lists_id_mapping.get(row['ListId']):
+                                new_list = List(name=row['ListName'], user=request.user)
+                                new_list.save()
+                                lists_id_mapping[row['ListId']] = new_list.id
+                            new_item.list_id = lists_id_mapping[row['ListId']]
+
                         new_item.save()
                 messages.success(request, '%s imported.' % request.FILES['file'].name)
+
             except Exception as e:
                 logger.error('Error in importing file %s\n%s', request.FILES['file'].name, e, exc_info=True)
                 messages.error(request, 'Import failed.')

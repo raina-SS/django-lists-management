@@ -1,9 +1,9 @@
 :root {
-    --federal-blue: #03045eff;
-    --honolulu-blue: #0077b6ff;
-    --pacific-cyan: #00b4d8ff;
-    --non-photo-blue: #90e0efff;
-    --light-cyan: #caf0f8ff;
+    --federal-blue: #d4a373ff;
+    --honolulu-blue: #faedcdff;
+    --pacific-cyan: #fefae0ff;
+    --non-photo-blue: #e9edc9ff;
+    --light-cyan: #ccd5aeff;
 }
 
 body {
