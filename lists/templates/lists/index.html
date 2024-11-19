@@ -185,7 +185,7 @@
             <form method="post" action="{% url 'lists:import' %}" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-body">
-                    {{ import_form }}
+                    {{ import_form.as_p }}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="hideModal('importListModal')">Close

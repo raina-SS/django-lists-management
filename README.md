@@ -29,7 +29,7 @@ their own lists with complete privacy.
     source {env_name}/bin/activate
     ```
 
-3. Create `.env` file in root directly and add values for keys from `.env.sample` 
+3. Create `.env` file in root directly and add values for keys from `.env.sample`
 
 4. Install dependencies:
    `pip install -r requirements.txt`
@@ -41,6 +41,22 @@ their own lists with complete privacy.
     ```
    Access the app at http://127.0.0.1:8000/.
 
-### Import Data format
+### Import Data
 
-Refer to import format provided in CSV file `import-format.csv`
+#### Import options
+
+1. **Create all new Lists**
+    - All Lists will be created as new, even if they already exist in this account.
+    - List ID should be provided to group list items.
+2. **Includes existing Lists**
+    - If a List with the same List ID already exists, the Items will be added to that existing List.
+    - If List ID is empty, a new list will be created given list name.
+    - If List ID is added, it will add to that existing list.
+3. **Import only Items**
+    - All Items will be added to an existing List with the same List ID. 
+    - If no List exists, the Items will not be added.
+
+#### Notes
+- Accepted headers are provided in sample CSV file `import-format.csv`. 
+- List names are not unique. Unique identifier List ID is used instead.
+
