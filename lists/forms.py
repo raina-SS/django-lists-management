@@ -26,7 +26,7 @@ class EditItemForm(ModelForm):
 
 class ImportForm(forms.Form):
     # TODO: file size validation
-    file = forms.FileField(required=False, validators=[FileExtensionValidator(['csv'], 'Only .csv files are allowed')])
+    file = forms.FileField(validators=[FileExtensionValidator(['csv'], 'Only .csv files are allowed')])
     option = forms.ChoiceField(
         choices=[
             ('new-lists', 'Create all new Lists'),

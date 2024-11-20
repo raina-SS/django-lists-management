@@ -1,9 +1,9 @@
 :root {
-    --federal-blue: #d4a373ff;
-    --honolulu-blue: #faedcdff;
-    --pacific-cyan: #fefae0ff;
-    --non-photo-blue: #e9edc9ff;
-    --light-cyan: #ccd5aeff;
+    --taupe: #463f3aff;
+    --battleship-gray: #8a817cff;
+    --silver: #bcb8b1ff;
+    --isabelline: #f4f3eeff;
+    --melon: #e0afa0ff;
 }
 
 body {
@@ -12,67 +12,67 @@ body {
 
 /* Sidebar */
 .sidebar {
-    background-color: var(--federal-blue);
-    color: var(--pacific-cyan);
+    background-color: var(--taupe);
+    color: var(--isabelline);
     width: 25%;
     min-height: 100vh;
 }
 
 .sidebar h2 {
-    color: var(--pacific-cyan);
-    border-bottom: 2px solid var(--non-photo-blue);
+    color: var(--isabelline);
+    border-bottom: 2px solid var(--silver);
 }
 
 .sidebar .nav-link {
-    color: var(--pacific-cyan);
+    color: var(--isabelline);
 }
 
 .sidebar .nav-link:hover,
 .sidebar .nav-item.bg-secondary {
-    background-color: var(--light-cyan);
-    color: var(--federal-blue);
+    background-color: var(--silver);
+    color: var(--taupe);
 }
 
 /* Buttons */
 .btn-warning {
-    background-color: var(--non-photo-blue);
+    background-color: var(--silver);
     border: none;
-    color: var(--federal-blue);
+    color: var(--taupe);
 }
 
 .btn-warning:hover {
-    background-color: var(--honolulu-blue);
-    color: var(--federal-blue);
+    background-color: var(--isabelline);
+    color: var(--taupe);
 }
 
 .btn-danger {
-    background-color: var(--federal-blue);
-    color: var(--pacific-cyan);
+    background-color: var(--taupe);
+    color: var(--isabelline);
 }
 
 .btn-danger:hover {
-    background-color: var(--honolulu-blue);
-    color: var(--federal-blue);
+    background-color: var(--isabelline);
+    color: var(--taupe);
 }
 
 /* Main Content */
 .content {
-    background-color: var(--pacific-cyan);
-    color: var(--federal-blue);
+    background-color: var(--isabelline);
+    color: var(--taupe);
     padding: 2rem;
 }
 
 .content h2 {
-    color: var(--federal-blue);
+    color: var(--taupe);
 }
 
 .list-group-item {
-    border: 1px solid var(--honolulu-blue);
-    color: var(--federal-blue);
+    border: 1px solid var(--silver);
+    color: var(--taupe);
 }
 
 .list-group-item:hover {
-    background-color: var(--light-cyan);
+    background-color: var(--silver);
 }
 
 .list-group-item .item-name:hover {
@@ -81,55 +81,55 @@ body {
 
 /* Modals */
 .modal-content {
-    background-color: var(--light-cyan);
-    color: var(--federal-blue);
+    background-color: var(--silver);
+    color: var(--taupe);
 }
 
 .modal-header {
-    border-bottom: 1px solid var(--non-photo-blue);
+    border-bottom: 1px solid var(--isabelline);
 }
 
 .modal-footer {
-    border-top: 1px solid var(--non-photo-blue);
+    border-top: 1px solid var(--isabelline);
 }
 
 .btn-close {
-    color: var(--federal-blue);
+    color: var(--taupe);
 }
 
 .modal-footer .btn-primary,
 .modal-footer .btn-secondary {
-    background-color: var(--federal-blue);
+    background-color: var(--taupe);
     border: none;
-    color: var(--pacific-cyan);
+    color: var(--isabelline);
 }
 
 .modal-footer .btn-primary:hover,
 .modal-footer .btn-secondary:hover {
-    background-color: var(--honolulu-blue);
-    color: var(--federal-blue);
+    background-color: var(--isabelline);
+    color: var(--taupe);
 }
 
 /* Sorting Dropdown */
 .form-select {
-    background-color: var(--non-photo-blue);
-    border: 1px solid var(--honolulu-blue);
-    color: var(--federal-blue);
+    background-color: var(--silver);
+    border: 1px solid var(--isabelline);
+    color: var(--taupe);
 }
 
 .form-select:focus {
-    border-color: var(--light-cyan);
-    box-shadow: 0 0 0 0.2rem rgba(76, 115, 102, 0.25);
+    border-color: var(--silver);
+    box-shadow: 0 0 0 0.2rem rgba(136, 128, 116, 0.25);
 }
 
 /* Input Fields */
 .form-control {
-    background-color: var(--pacific-cyan);
-    border: 1px solid var(--non-photo-blue);
-    color: var(--federal-blue);
+    background-color: var(--isabelline);
+    border: 1px solid var(--silver);
+    color: var(--taupe);
 }
 
 .form-control:focus {
-    border-color: var(--light-cyan);
-    box-shadow: 0 0 0 0.2rem rgba(76, 115, 102, 0.25);
+    border-color: var(--silver);
+    box-shadow: 0 0 0 0.2rem rgba(136, 128, 116, 0.25);
 }

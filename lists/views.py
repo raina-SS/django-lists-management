@@ -1,6 +1,7 @@
 import csv
 import re
 from io import TextIOWrapper
+from pprint import pformat
 
 from django.contrib.messages import error
 from django.http import HttpResponseBadRequest, JsonResponse
@@ -14,7 +15,7 @@ from lists.forms import ItemForm, EditItemForm, ImportForm
 from lists.models import List, Item
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('lists')
 
 
 @login_required(login_url='/')
@@ -168,7 +169,7 @@ def import_list(request):
                         return redirect('/lists')
 
                     lists_id_mapping = {}
-                    error_messages_mapping = {}
+                    validation_errors = {}
                     read_rows = 0
                     for row_number, row in enumerate(csv_reader, start=1):
                         row_error_messages = []
@@ -201,9 +202,11 @@ def import_list(request):
                                 row_error_messages.append('List Name or ID is should be provided!')
                             if row['ListId'] and not List.objects.filter(id=row['ListId']).exists():
                                 row_error_messages.append('List #"%s" does not exist!' % row['ListId'])
+                            if not row['ListId'] and not row['ListName']:
+                                row_error_messages.append('List Name is empty!')
 
                         if len(row_error_messages) > 0:
-                            error_messages_mapping[row_number] = row_error_messages
+                            validation_errors[row_number] = row_error_messages
                             continue
 
                         # Create item
@@ -227,17 +230,18 @@ def import_list(request):
                             new_item.list_id = lists_id_mapping[row['ListId']]
                         new_item.save()
 
+                    logger.info(f"Validation errors: \n{pformat(validation_errors)}")
                     # If too many errors, show only row numbers
-                    if len(error_messages_mapping) > 10:
+                    if len(validation_errors) > 10:
                         messages.error(request,
-                                       f"Error occurred while importing for rows {','.join(map(str, error_messages_mapping.keys()))}")
+                                       f"Error occurred while importing for rows {','.join(map(str, validation_errors.keys()))}")
                     else:
-                        for row_number in error_messages_mapping:
+                        for row_number in validation_errors:
                             messages.error(
                                 request,
-                                f"Error in adding data for row #{row_number}: {', '.join(error_messages_mapping[row_number])}",
+                                f"Error in adding data for row #{row_number}: {', '.join(validation_errors[row_number])}",
                             )
-                    imported_rows = read_rows - len(error_messages_mapping)
+                    imported_rows = read_rows - len(validation_errors)
                 messages.success(request, f"{imported_rows} row(s) imported from {request.FILES['file'].name}.")
             except Exception as e:
                 logger.error('Error in importing file %s\n%s', request.FILES['file'].name, e, exc_info=True)

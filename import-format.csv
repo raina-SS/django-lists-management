@@ -1,5 +1,5 @@
 ListId,ListName,ItemName,IsCompleted,Color
-1,Grocery Shopping,Milk,False,#FFFFFF
+1,Grocery Shopping,Milk,False,#FFFF11
 1,Grocery Shopping,Eggs,True,
-2,To-Do,Finish report,,#FF5733
+2,To-Do,Finish report,,#F53
 3,Groceries,Apples,True,

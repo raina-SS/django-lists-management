@@ -1,18 +1,18 @@
 :root {
-    --federal-blue: #03045eff;
-    --honolulu-blue: #0077b6ff;
-    --pacific-cyan: #00b4d8ff;
-    --non-photo-blue: #90e0efff;
-    --light-cyan: #caf0f8ff;
+    --taupe: #463f3aff;
+    --battleship-gray: #8a817cff;
+    --silver: #bcb8b1ff;
+    --isabelline: #f4f3eeff;
+    --melon: #e0afa0ff;
 }
 
 body {
-    background-color: var(--pacific-cyan);
+    background-color: var(--melon);
     font-family: Arial, sans-serif;
 }
 
 .container {
-    background-color: var(--non-photo-blue);
+    background-color: var(--isabelline);
     border-radius: 8px;
     padding: 2rem;
     max-width: 600px;
@@ -20,21 +20,21 @@ body {
 }
 
 h1, h2 {
-    color: var(--federal-blue);
+    color: var(--taupe);
 }
 
 .card {
-    background-color: var(--light-cyan);
-    border: 1px solid var(--federal-blue);
+    background-color: var(--silver);
+    border: 1px solid var(--taupe);
     border-radius: 8px;
     margin-bottom: 1.5rem;
 }
 
 .card-header {
-    background-color: var(--federal-blue);
-    color: var(--pacific-cyan);
+    background-color: var(--taupe);
+    color: var(--melon);
     padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--honolulu-blue);
+    border-bottom: 1px solid var(--battleship-gray);
     border-radius: 8px 8px 0 0;
 }
 
@@ -44,17 +44,19 @@ h1, h2 {
 
 .alert-info {
     padding: 0.75rem;
+    background-color: var(--silver);
+    color: var(--taupe);
     border-radius: 4px;
 }
 
 .btn-primary, .btn-secondary {
-    background-color: var(--federal-blue);
-    color: var(--pacific-cyan);
+    background-color: var(--taupe);
+    color: var(--isabelline);
     border: none;
     width: 100%;
 }
 
 .btn-primary:hover, .btn-secondary:hover {
-    background-color: var(--honolulu-blue);
-    color: var(--federal-blue);
+    background-color: var(--battleship-gray);
+    color: var(--taupe);
 }
