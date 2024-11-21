@@ -1,19 +1,18 @@
 import csv
+import logging
 import re
 from io import TextIOWrapper
 from pprint import pformat
 
-from django.contrib.messages import error
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import DatabaseError
+from django.db import DatabaseError, transaction
 from django.views.decorators.csrf import requires_csrf_token
 
 from lists.forms import ItemForm, EditItemForm, ImportForm
 from lists.models import List, Item
-import logging
 
 logger = logging.getLogger('lists')
 
@@ -171,71 +170,72 @@ def import_list(request):
                     lists_id_mapping = {}
                     validation_errors = {}
                     read_rows = 0
-                    for row_number, row in enumerate(csv_reader, start=1):
-                        row_error_messages = []
-                        read_rows += 1
+                    with transaction.atomic():
+                        for row_number, row in enumerate(csv_reader, start=1):
+                            row_error_messages = []
+                            read_rows += 1
 
-                        # Validate item data
-                        if not row['ItemName']:
-                            row_error_messages.append('Item name is empty!')
-                        if row['Color'] and not re.fullmatch(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$', row['Color']):
-                            row_error_messages.append('Color code is invalid!')
-                        if row['IsCompleted'] not in ['True', 'False', '']:
-                            row_error_messages.append('Is Completed value is invalid!')
+                            # Validate item data
+                            if not row['ItemName']:
+                                row_error_messages.append('Item name is empty!')
+                            if row['Color'] and not re.fullmatch(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$', row['Color']):
+                                row_error_messages.append('Color code is invalid!')
+                            if row['IsCompleted'] not in ['True', 'False', '']:
+                                row_error_messages.append('Is Completed value is invalid!')
 
-                        # Validate list data based on selected import option
-                        # If all are new lists & items
-                        if import_option == 'new-lists':
-                            if not row['ListName']:
-                                row_error_messages.append('List name is empty!')
-                            if not row['ListId']:
-                                row_error_messages.append('List ID is empty!')
-                        # If only items are to be imported, valid list ID should be provided
-                        elif import_option == 'items-only':
-                            if not row['ListId']:
-                                row_error_messages.append('List ID is empty!')
-                            elif not List.objects.filter(id=row['ListId']).exists():
-                                row_error_messages.append('List #"%s" does not exist!' % row['ListId'])
-                        # If existing lists' IDs are provided along with new lists, validate them
-                        elif import_option == 'existing-lists':
-                            if not row['ListId'] and not row['ListName']:
-                                row_error_messages.append('List Name or ID is should be provided!')
-                            if row['ListId'] and not List.objects.filter(id=row['ListId']).exists():
-                                row_error_messages.append('List #"%s" does not exist!' % row['ListId'])
-                            if not row['ListId'] and not row['ListName']:
-                                row_error_messages.append('List Name is empty!')
+                            # Validate list data based on selected import option
+                            # If all are new lists & items
+                            if import_option == 'new-lists':
+                                if not row['ListName']:
+                                    row_error_messages.append('List name is empty!')
+                                if not row['ListId']:
+                                    row_error_messages.append('List ID is empty!')
+                            # If only items are to be imported, valid list ID should be provided
+                            elif import_option == 'items-only':
+                                if not row['ListId']:
+                                    row_error_messages.append('List ID is empty!')
+                                elif not List.objects.filter(id=row['ListId']).exists():
+                                    row_error_messages.append('List #"%s" does not exist!' % row['ListId'])
+                            # If existing lists' IDs are provided along with new lists, validate them
+                            elif import_option == 'existing-lists':
+                                if not (row['ListId'] or row['ListName']):
+                                    row_error_messages.append('List Name or ID is should be provided!')
+                                if row['ListId'] and not List.objects.filter(id=row['ListId']).exists():
+                                    row_error_messages.append(f'List #"{row["ListId"]}" does not exist!')
+                                if not row['ListId'] and not row['ListName']:
+                                    row_error_messages.append('List Name is empty!')
 
-                        if len(row_error_messages) > 0:
-                            validation_errors[row_number] = row_error_messages
-                            continue
+                            if len(row_error_messages) > 0:
+                                validation_errors[row_number] = row_error_messages
+                                continue
 
-                        # Create item
-                        new_item = Item(
-                            name=row['ItemName'],
-                            is_completed=row['IsCompleted'] == 'True',
-                        )
-                        if row['Color']:
-                            new_item.color = row['Color']
+                            # Create item
+                            new_item = Item(
+                                name=row['ItemName'],
+                                is_completed=row['IsCompleted'] == 'True',
+                            )
+                            if row['Color']:
+                                new_item.color = row['Color']
 
-                        if import_option == 'items-only':
-                            new_item.list_id = row['ListId']
-                        elif import_option == 'existing-lists' and row['ListId']:
-                            new_item.list_id = row['ListId']
-                        else:
-                            # Check if the list is already created, else create list
-                            if not lists_id_mapping.get(row['ListId']):
-                                new_list = List(name=row['ListName'], user=request.user)
-                                new_list.save()
-                                lists_id_mapping[row['ListId']] = new_list.id
-                            new_item.list_id = lists_id_mapping[row['ListId']]
-                        new_item.save()
+                            if import_option == 'items-only':
+                                new_item.list_id = row['ListId']
+                            elif import_option == 'existing-lists' and row['ListId']:
+                                new_item.list_id = row['ListId']
+                            else:
+                                # Check if the list is already created, else create list
+                                if not lists_id_mapping.get(row['ListId']):
+                                    new_list = List(name=row['ListName'], user=request.user)
+                                    new_list.save()
+                                    lists_id_mapping[row['ListId']] = new_list.id
+                                new_item.list_id = lists_id_mapping[row['ListId']]
+                            new_item.save()
 
                     logger.info(f"Validation errors: \n{pformat(validation_errors)}")
-                    # If too many errors, show only row numbers
                     if len(validation_errors) > 10:
-                        messages.error(request,
-                                       f"Error occurred while importing for rows {','.join(map(str, validation_errors.keys()))}")
+                        raise ValueError(f"Too many errors: {len(validation_errors)} rows failed validation.")
                     else:
+                        # Log validation errors and display row-specific errors
+                        logger.info(f"Validation errors: \n{pformat(validation_errors)}")
                         for row_number in validation_errors:
                             messages.error(
                                 request,
@@ -243,6 +243,9 @@ def import_list(request):
                             )
                     imported_rows = read_rows - len(validation_errors)
                 messages.success(request, f"{imported_rows} row(s) imported from {request.FILES['file'].name}.")
+            except ValueError as ve:
+                logger.error('Import aborted: %s', ve)
+                messages.error(request, f"Import failed. {ve}")
             except Exception as e:
                 logger.error('Error in importing file %s\n%s', request.FILES['file'].name, e, exc_info=True)
                 messages.error(request, 'Import failed. Please check the logs for more details.')
